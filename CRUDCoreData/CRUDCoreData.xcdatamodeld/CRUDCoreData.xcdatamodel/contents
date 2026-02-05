@@ -2,5 +2,10 @@
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="24512" systemVersion="25C56" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="ListItems" representedClassName=".ListItems" syncable="YES" codeGenerationType="class">
         <attribute name="name" optional="YES" attributeType="String"/>
+        <relationship name="price" maxCount="1" deletionRule="Nullify" destinationEntity="Price" inverseName="item" inverseEntity="Price"/>
+    </entity>
+    <entity name="Price" representedClassName="Price" syncable="YES" codeGenerationType="class">
+        <attribute name="amount" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <relationship name="item" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="ListItems" inverseName="price" inverseEntity="ListItems"/>
     </entity>
 </model>

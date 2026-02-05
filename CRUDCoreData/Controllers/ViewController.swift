@@ -37,6 +37,9 @@ class ViewController: UIViewController {
     // MARK: - Show alert (Add / Edit)
     func showAlert(title: String, itemToEdit: ListItems? = nil) {
         var textField = UITextField()
+        //Textfield for price
+        var priceField = UITextField()
+
         let alert = UIAlertController(
             title: title,
             message: nil,
@@ -49,18 +52,33 @@ class ViewController: UIViewController {
             textField = tf
         }
 
+        alert.addTextField { tf in
+            tf.placeholder = "Price"
+            tf.keyboardType = .decimalPad
+            if let price = itemToEdit?.price?.amount {
+                tf.text = "\(price)"
+            }
+            priceField = tf
+        }
+
         let actionTitle = itemToEdit == nil ? "Add" : "Update"
         let action = UIAlertAction(title: actionTitle, style: .default) { _ in
-            guard let text = textField.text, !text.isEmpty else { return }
+            guard
+                let name = textField.text, !name.isEmpty,
+                let priceText = priceField.text,
+                let priceValue = Double(priceText)
+            else { return }
 
-            if let item = itemToEdit {
-                // Edit existing item
-                item.name = text
-            } else {
-                // ➕ Add new item
-                let newItem = ListItems(context: self.context)
-                newItem.name = text
-                self.listItemArry.append(newItem)
+            let item = itemToEdit ?? ListItems(context: self.context)
+            item.name = name
+
+            let price = item.price ?? Price(context: self.context)
+            price.amount = priceValue
+            price.item = item
+            item.price = price
+
+            if itemToEdit == nil {
+                self.listItemArry.append(item)
             }
 
             self.saveData()
@@ -107,7 +125,10 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
             withIdentifier: "cell",
             for: indexPath
         )
-        cell.textLabel?.text = listItemArry[indexPath.row].name
+        let item = listItemArry[indexPath.row]
+        let name = item.name ?? ""
+        let price = item.price?.amount ?? 0
+        cell.textLabel?.text = "\(name)  $\( price)"
         return cell
     }
 
@@ -120,7 +141,7 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
         showAlert(title: "Edit Item ✏️", itemToEdit: selectedItem)
         tableView.deselectRow(at: indexPath, animated: true)
     }
-    
+
     //MARK: Swipe to delete func
     func tableView(
         _ tableView: UITableView,
